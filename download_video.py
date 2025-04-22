@@ -1,7 +1,12 @@
 import yt_dlp as youtube_dl
 import requests
+import os
+from pathlib import Path
 
 def download_mp3_yt_dlp(youtube_url):
+    # Especificar la ubicación de FFmpeg
+    ffmpeg_path = str(Path(os.path.expanduser("~")) / "ffmpeg" / "bin")
+    
     # Set up yt-dlp options
     ydl_opts = {
         'format': 'bestaudio/best',
@@ -14,6 +19,7 @@ def download_mp3_yt_dlp(youtube_url):
         'quiet': False,
         'no_warnings': True,
         'progress_hooks': [lambda d: print(f"Downloading {d['filename']}: {d['_percent_str']}")],
+        'ffmpeg_location': ffmpeg_path,  # Especificar la ubicación de FFmpeg
     }
 
     # Extract video info including title and thumbnail

@@ -2,6 +2,7 @@ import os
 import whisper
 import gradio as gr
 from download_video import download_mp3_yt_dlp 
+from pathlib import Path
 
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning, module="torch")
@@ -15,10 +16,15 @@ def download_video_info(url):
 
         return audio_file, title, thumbnail_url
     except Exception as e:
-        return None, None, None, str(e)
+        print(f"Error downloading video: {str(e)}")
+        return None, None, None
 
 # Function to transcribe the downloaded audio using Whisper
 def transcribe_audio(audio_path, model_size="base", language="en"):
+    # Especificar la ubicación de FFmpeg
+    ffmpeg_path = str(Path(os.path.expanduser("~")) / "ffmpeg" / "bin" / "ffmpeg.exe")
+    os.environ["PATH"] = f"{os.path.dirname(ffmpeg_path)};{os.environ['PATH']}"
+    
     model = whisper.load_model(model_size)
     result = model.transcribe(audio_path, language=language)
     return result['text']
@@ -89,4 +95,9 @@ with gr.Blocks() as demo:
 
 # Launch the app
 if __name__ == "__main__":
+    # Asegurarse de que FFmpeg esté en el PATH
+    ffmpeg_bin = str(Path(os.path.expanduser("~")) / "ffmpeg" / "bin")
+    os.environ["PATH"] = f"{ffmpeg_bin};{os.environ['PATH']}"
+    print(f"Usando FFmpeg desde: {ffmpeg_bin}")
+    
     demo.launch(server_name="0.0.0.0", server_port=7860)
